@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Neural Quest — English Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/synaptic/1.1.4/synaptic.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-screen="welcome">
+
+  <div class="bg-sparks" id="bgSparks"></div>
+
+  <div class="app-frame">
+
+    <header class="topbar">
+      <button class="back-arrow" id="backBtn" type="button" aria-label="Volver">
+        <svg viewBox="0 0 24 24"><path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="topbar-right">
+        <button class="icon-btn" id="skipRoundBtn" type="button" data-hide-outside-game title="Saltear esta pregunta">
+          <svg viewBox="0 0 24 24"><path d="M6 5 L14 12 L6 19 M15 5 v14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-btn" id="skipLevelBtn" type="button" data-hide-outside-game title="Terminar este bloque ahora">
+          <svg viewBox="0 0 24 24"><path d="M6 5 L14 12 L6 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><line x1="16" y1="5" x2="16" y2="19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="statsToggleBtn" type="button" title="Ver estadísticas">
+          <svg viewBox="0 0 24 24"><path d="M5 19 V11 M12 19 V5 M19 19 v-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="muteBtn" type="button" title="Silenciar música">
+          <svg viewBox="0 0 24 24" id="muteIcon"><path d="M4 9 v6 h4 l5 4 V5 L8 9 Z" fill="currentColor" stroke="none"/><path d="M16 8.5 a5 5 0 0 1 0 7 M18.5 6 a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage" id="stage">
+
+      <section class="screen active" data-screen="welcome" id="screenWelcome">
+        <div class="screen-inner narrow" style="text-align:center;">
+          <span class="eyebrow">Synaptic.js · red neuronal en Node.js</span>
+          <h1>Neural Quest <em>English Lab</em></h1>
+          <p class="lead">Practicá inglés en bloques cortos de 10 rondas. Tu avatar va a crecer en vivo según cómo te va, gracias a una red neuronal que ajusta la dificultad todo el tiempo.</p>
+          <button class="cta-btn" id="toTopicBtn" type="button">Empezar</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="topic" id="screenTopic">
+        <div class="screen-inner wide">
+          <h2>Elegí un tema para practicar</h2>
+          <p class="sub">Cada tema tiene sus propios ejercicios de completar oraciones, escritura y pronunciación.</p>
+          <div class="topic-grid" id="topicChoice"></div>
+          <div class="nav-row">
+            <button class="ghost-btn" id="topicBackBtn" type="button">Volver</button>
+            <button class="cta-btn" id="toLevelBtn" type="button" disabled>Siguiente</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="level" id="screenLevel">
+        <div class="screen-inner narrow">
+          <h2>Elegí tu nivel de partida</h2>
+          <p class="sub">La red va a subir o bajar la dificultad sola, esto es solo el punto de partida.</p>
+          <div class="level-grid" id="levelChoice"></div>
+          <div class="nav-row">
+            <button class="ghost-btn" id="levelBackBtn" type="button">Volver</button>
+            <button class="cta-btn" id="startBtn" type="button" disabled>Comenzar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="game" id="screenGame">
+        <div class="game-wrap">
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="qcount" id="qCount">Ronda 1 / 10</div>
+
+          <div class="game-body">
+            <div class="avatar-stage" id="avatarStage">
+              <svg id="robotSvg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#1d3a33"/><stop offset="100%" stop-color="#152925"/>
+                  </linearGradient>
+                  <radialGradient id="chestGlowGrad">
+                    <stop id="glowStop1" offset="0%" stop-color="#7DE0FF" stop-opacity="0.9"/>
+                    <stop id="glowStop2" offset="100%" stop-color="#7DE0FF" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+                <ellipse cx="100" cy="208" rx="46" ry="7" fill="#000" opacity="0.25"/>
+                <line x1="100" y1="20" x2="100" y2="4" stroke="#2a4a40" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="100" cy="4" r="6" fill="#F2C14E"/>
+                <rect x="42" y="112" width="116" height="88" rx="24" fill="url(#bodyGrad)" stroke="#2a4a40" stroke-width="2.5"/>
+                <rect x="20" y="128" width="20" height="46" rx="10" fill="#1a332c" stroke="#2a4a40" stroke-width="2"/>
+                <rect x="160" y="128" width="20" height="46" rx="10" fill="#1a332c" stroke="#2a4a40" stroke-width="2"/>
+                <rect x="70" y="128" width="60" height="48" rx="10" fill="#0c1917" stroke="#2a4a40" stroke-width="2"/>
+                <circle id="chestGlow" cx="100" cy="152" r="24" fill="url(#chestGlowGrad)"/>
+                <g id="chestBrain" stroke="#7DE0FF" stroke-width="2.2" fill="none" stroke-linecap="round">
+                  <path d="M85 152 a9 9 0 1 1 12 -8 a8 8 0 0 1 8 8 a9 9 0 1 1 -10 9 a8 8 0 0 1 -10 -9z"/>
+                  <path d="M100 144 v16"/>
+                </g>
+                <rect x="50" y="20" width="100" height="86" rx="28" fill="url(#bodyGrad)" stroke="#2a4a40" stroke-width="2.5"/>
+                <g class="mood-eyes eyes-idle">
+                  <circle cx="80" cy="60" r="8" fill="#7DE0FF"/><circle cx="120" cy="60" r="8" fill="#7DE0FF"/>
+                  <circle cx="80" cy="60" r="2.4" fill="#0c1917"/><circle cx="120" cy="60" r="2.4" fill="#0c1917"/>
+                </g>
+                <g class="mood-eyes eyes-happy" style="display:none;">
+                  <path d="M72 62 a8 8 0 0 1 16 0" stroke="#6EE7B7" stroke-width="4" fill="none" stroke-linecap="round"/>
+                  <path d="M112 62 a8 8 0 0 1 16 0" stroke="#6EE7B7" stroke-width="4" fill="none" stroke-linecap="round"/>
+                </g>
+                <g class="mood-eyes eyes-sad" style="display:none;">
+                  <path d="M72 58 a8 8 0 0 0 16 0" stroke="#F2836B" stroke-width="4" fill="none" stroke-linecap="round"/>
+                  <path d="M112 58 a8 8 0 0 0 16 0" stroke="#F2836B" stroke-width="4" fill="none" stroke-linecap="round"/>
+                </g>
+                <g class="mood-eyes eyes-thinking" style="display:none;">
+                  <circle cx="80" cy="60" r="8" fill="#F2C14E"/><circle cx="80" cy="60" r="2.4" fill="#0c1917"/>
+                  <line x1="112" y1="60" x2="128" y2="60" stroke="#F2C14E" stroke-width="4" stroke-linecap="round"/>
+                </g>
+                <g class="mood-mouth mouth-idle">
+                  <line x1="88" y1="84" x2="112" y2="84" stroke="#8ea89e" stroke-width="3" stroke-linecap="round"/>
+                </g>
+                <g class="mood-mouth mouth-happy" style="display:none;">
+                  <path d="M84 80 q16 14 32 0" stroke="#6EE7B7" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                </g>
+                <g class="mood-mouth mouth-sad" style="display:none;">
+                  <path d="M84 88 q16 -12 32 0" stroke="#8ea89e" stroke-width="3" fill="none" stroke-linecap="round"/>
+                </g>
+                <g class="mood-mouth mouth-thinking" style="display:none;">
+                  <line x1="90" y1="85" x2="108" y2="85" stroke="#8ea89e" stroke-width="3" stroke-linecap="round"/>
+                </g>
+              </svg>
+              <span class="grow-label" id="growLabel">nivel del avatar: 50%</span>
+            </div>
+
+            <div class="activity-card">
+              <div class="skills" id="skillPills">
+                <span class="pill" id="pill-reading">Lectura</span>
+                <span class="pill" id="pill-listening">Escucha</span>
+                <span class="pill" id="pill-writing">Escritura</span>
+                <span class="pill" id="pill-speaking">Habla</span>
+              </div>
+              <div id="activityArea"></div>
+              <div class="feedback" id="feedback"></div>
+              <button class="next" id="nextBtn" style="display:none;">Siguiente</button>
+              <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="end" id="screenEnd">
+        <div class="screen-inner narrow">
+          <div class="end-badge">✓</div>
+          <h2>¡Bloque completado!</h2>
+          <p class="lead" id="endMessage"></p>
+          <div class="end-stats">
+            <div class="stat"><div class="label">Precisión final</div><div class="value" id="endAcc">0%</div></div>
+            <div class="stat"><div class="label">Mejor racha</div><div class="value" id="endStreak">0</div></div>
+            <div class="stat"><div class="label">Nivel alcanzado</div><div class="value" id="endLevel">-</div></div>
+          </div>
+          <p class="side-title" style="text-align:left;">Diagnóstico por destreza</p>
+          <div class="skill-bars" id="endSkillBars" style="text-align:left;margin-bottom:18px;"></div>
+          <div class="program-card">
+            <div class="ptitle">Programa personalizado para tu próximo bloque</div>
+            <p id="programText">Calculando...</p>
+            <div class="program-actions">
+              <button class="cta-btn" id="continueProgramBtn" type="button">Empezar programa personalizado</button>
+              <button class="ghost-btn" id="chooseTopicAgainBtn" type="button">Elegir otro tema</button>
+              <button class="ghost-btn" id="mainMenuBtn" type="button">Menú principal</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="stats-overlay" id="statsOverlay"></div>
+  <div class="stats-drawer" id="statsDrawer">
+    <button class="icon-btn drawer-close" id="statsCloseBtn" type="button" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24"><path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>
+    <span class="topic-mini" id="drawerTopic">Tema: Passive Voice</span>
+    <span class="session-mini" id="drawerSession">Sesión 1 · Nivel Beginner</span>
+    <div class="stat-grid" style="margin-top:12px;">
+      <div class="stat"><div class="label">Precisión</div><div class="value" id="statAcc">0%</div></div>
+      <div class="stat"><div class="label">Racha</div><div class="value" id="statStreak">0</div></div>
+      <div class="stat"><div class="label">Tiempo prom.</div><div class="value" id="statTime">–</div></div>
+      <div class="stat"><div class="label">Dificultad IA</div><div class="value" id="statDiff">0.50</div></div>
+    </div>
+    <p class="side-title">Perfil por destreza</p>
+    <div class="skill-bars" id="skillBars"></div>
+    <details class="net-details">
+      <summary>Ver la red neuronal en vivo</summary>
+      <p class="brain-sub">Red 5 → 8 → 1, entrenada con Synaptic.js (Architect.Perceptron)</p>
+      <div class="net-frame"><svg class="net" id="netSvg" viewBox="0 0 260 170"></svg></div>
+    </details>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
